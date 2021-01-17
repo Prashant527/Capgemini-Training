@@ -1,0 +1,148 @@
+MongoDB Assingments
+----------------------
+A1:
+mongo
+show dbs
+use mongo_practice
+db.createCollection("movies")
+db.movies.insert([
+... {
+... title:"Pulp Fiction",
+... writer:"Chuck Palahniuko",
+... year:"1999",
+... actors:[
+... "Brad Pitt",
+... "Edward Norton"]}
+... ])
+ db.movies.insert([ 
+{
+ title:"Fight Club", 
+writer:"Quentin Tarantino",
+ year:"1994", 
+actors:[ "John Travolt", "uma Thurman"]
+} ])
+ db.movies.insertMany(
+... [
+... {
+... title:"Inglorious Basterds",
+... writer:"Quentin Tarantino",
+... year:"2009",
+... actors:["Brad Pitt","Diane Kruger","Eli Roth"]
+... },
+... {
+... title:"The Hobbit:An Unexpected Journey",
+... writer:"J.R.R.Tolkein",
+... year:"2012",
+... franchise:"The Hobbit"
+... },
+... {
+... title:"The Hobbit:The Desolation Of Smaug",
+... Writer:"J.R.R. Tolkein",
+... year:"2012",
+... franchise:"The Hobbit"
+... },
+... {
+... title:"Th Hobbit:The battle of the Five Armies",
+... writer:J.R.R.Tolkein,
+... year:"2010",
+... franchise:"The Hobbit"
+... }
+... ])
+db.movies.find().pretty()
+db.movies.find({writer:"Quentin Tarantino"}).pretty()
+db.movies.find({franchise:"The Hobbit"}).pretty()
+db.movies.find({"year":{$lt:"2000"}}).pretty()
+db.movies.find({$or: [{year: {$lt: "2000"}}, {year: {$gt: "2010"}}]}).pretty()
+
+db.movies.update({'title':'The Hobbit:An Unexpected Journey'},
+{$set:{'synopsis':"A reluctant hobbit, Bilbo Baggins, sets out to the Lonely 
+Mountain with a spirited group of dwarves to reclaim their mountain home - and 
+the gold within it - from the dragon Smaug."}})
+
+db.movies.update({'title':'The Hobbit:The Desolation Of Smaug'},
+{$set:{'synopsis':"The dwarves, along with Bilbo Baggins and Gandalf the Grey, 
+continue their quest to reclaim Erebor, their homeland, from Smaug. Bilbo Baggins 
+is in possession of a mysterious and magical ring."}})
+
+ db.user.insert(
+... {
+... username:'GoodGuyGreg',
+... first_name:'Good Guy',
+db.user.insert( { username:'ScumbagSteve', full_name:[{"first":'Scumbag',"last":'Steve'}]})
+ db.users.find().pretty();
+ db.posts.find().pretty();
+ db.posts.find({username:"GoodGuyGreg"}).pretty()
+ db.posts.find({username:"ScumbagSteve"}).pretty()
+ db.comments.find().pretty();
+ db.comments.find({username:"GoodGuyGreg"}).pretty()
+ db.comments.find({username:"ScumbagSteve"}).pretty()
+
+
+
+==================================================
+A2:
+use population
+show collections
+db.zipcodes.find().pretty()
+db.zipcodes.find({$and:[{city:'ATLANTA'},{state:'GA'}]}).pretty()
+db.zipcodes.aggregate([{$match:{city:"ATLANTA",state:"GA"}}]).pretty()
+db.zipcodes.aggregate([
+... {$match:{city:'ATLANTA'}},
+... {$group:{_id:"city",total_pop:{$sum:"$pop"}}}
+... ])
+db.zipcodes.aggregate([ {$group:{_id:"$state",total_pop:{$sum:"$pop"}}} ])
+db.zipcodes.aggregate([ {$group:{_id:"$state",total_pop:{$sum:"$pop"}}} ])
+> db.zipcodes.aggregate([ {$group:{_id:"$state",total_pop:{$sum:"$pop"}}},{$sort:{total_pop:-1}},{$limit:3} ])
+ db.zipcodes.aggregate([ {$group:{_id:"$city",total_pop:{$sum:"$pop"}}},{$sort:{total_pop:-1}},{$limit:3} ])
+db.zipcodes.aggregate([ {$group:{_id:"$city",avg_pop:{$avg:"$pop"}}},{$sort:{total_pop:-1}},{$limit:3} ])
+=====================================================================
+A3:
+use restaurants
+show collections
+db.addresses.find().pretty()
+ db.addresses.aggregate([
+... {$project:{"restaurant_id":1,"name":1,"borough":1,"cuisine":1}}
+... ])
+ db.addresses.aggregate([ {$project:{"_id":0,"restaurant_id":1,"name":1,"borough":1,"cuisine":1}} ])
+ db.addresses.aggregate([ {$project:{"_id":0,"restaurant_id":1,"name":1,"borough":1,"zip code":1}} ])
+db.addresses.aggregate([
+... {$match:{borough:"Bronx"}},
+... {$sort:{name:1}},
+... {$limit:5}
+... ])
+ db.addresses.aggregate([ {$match:{borough:"Bronx"}}, {$project:{"name":1,"borough":1}} ])
+db.addresses.aggregate([ {$match:{borough:"Bronx"}}, {$project:{"name":1,"borough":1}},{$skip:5},{$limit:5} ])
+db.addresses.find({grades : { $elemMatch:{"score":{$gt : 90}}}});
+db.addresses.find({grades : { $elemMatch:{"score":{$gt : 90,$lt:100}}}});
+>db.addresses.find({"address.coord":{$lt:-95.754168}})
+>db.addresses.find({"cuisine":{$ne:"American"},"grades.score":{$gt:70},"address.coord":{$lt:-65.754168}})
+db.addresses.find( { "cuisine" : {$ne : "American "},"grades.grade" :"A","borough": {$ne : "Brooklyn"}} ).sort({"cuisine":-1})
+
+
+db.addresses.find({name: /^Wil/},{"restaurant_id" : 1,"name":1,"borough":1,"cuisine" :1})
+db.addresses.find({name: /ces$/},{"restaurant_id" : 1,"name":1,"borough":1,"cuisine" :1})
+db.addresses.find({name: /.*Reg.*/},{"restaurant_id" : 1,"name":1,"borough":1,"cuisine" :1})
+
+db.addresses.find({ "borough": "Bronx" , $or : [{ "cuisine" : "American " },{ "cuisine" : "Chinese" }] } )
+>db.addresses.find({"borough" :{$in :["Staten Island","Queens","Bronx","Brooklyn"]}},{"restaurant_id" : 1,"name":1,"borough":1,"cuisine" :1})
+db.addresses.find({"borough" :{$nin :["Staten Island","Queens","Bronx","Brooklyn"]}},{"restaurant_id" : 1,"name":1,"borough":1,"cuisine" :1})
+db.addresses.find({"grades.score":{$lte : 10}},{"restaurant_id" : 1,"name":1,"borough":1,"cuisine" :1,"grades.score":1})
+db.addresses.find({$or: [{name: /^Wil/},{"$and": [{"cuisine" : {$ne :"American "}},{"cuisine" : {$ne :"Chinees"}} ]}]},
+{"restaurant_id" : 1,"name":1,"borough":1,"cuisine" :1})
+db.addresses.find({"grades.date": ISODate("2014-08-11T00:00:00Z"), "grades.grade":"A" , "grades.score" : 11},{"restaurant_id" : 1,"name":1,"grades":1})
+>db.addresses.find( { "grades.1.date": ISODate("2014-08-11T00:00:00Z"), "grades.1.grade":"A" ,  "grades.1.score" : 9 }, 
+{"restaurant_id" : 1,"name":1,"grades":1} )
+db.addresses.find( {  "address.coord.1": {$gt : 42, $lte : 52}},{"restaurant_id" : 1,"name":1,"address":1,"coord":1})
+db.addresses.find().sort({"name":1})
+db.addresses.find().sort({"name":-1})
+>db.addresses.find({"address.street":{$exists:true}})
+db.addresses.find({"addess.coord":{$type:1}})
+db.addresses.find({"grades.score":{$mod:[7,0]}},{"restaurant_id" : 1,"name":1,"grades":1})
+db.addresses.find({name: /.*mon.*/},{"restaurant_id" : 1,"name":1,"borough":1,"cuisine" :1,"address.coord":1,})
+db.addresses.find({name: /^Mad/},{"restaurant_id" : 1,"name":1,"borough":1,"cuisine" :1,"address.coord":1,})
+
+
+
+
+
+
